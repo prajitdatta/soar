@@ -23,7 +23,7 @@
 
 The name says it all: **S**tack · **O**vercome · **A**scend · **R**ise.
 
-**[▶ Play it now →](https://prajitdatta.github.io/soar-game)**
+**[▶ Play it now →](https://prajitdatta.github.io/soar)**
 
 ---
 
@@ -86,7 +86,7 @@ https://prajitdatta.github.io/soar-game
 ### Run locally
 
 ```bash
-git clone https://github.com/prajitdatta/soar-game.git
+git clone https://github.com/prajitdatta/soar.git
 cd soar-game
 open index.html   # drag into browser — that's it!
 ```
@@ -95,7 +95,7 @@ open index.html   # drag into browser — that's it!
 
 1. Push the repo to GitHub as `soar-game`
 2. **Settings → Pages → Source: main branch, / (root)**
-3. Live at `https://prajitdatta.github.io/soar-game` in ~60 seconds
+3. Live at `https://prajitdatta.github.io/soar` in ~60 seconds
 
 ---
 
