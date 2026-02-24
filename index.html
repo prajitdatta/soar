@@ -27,6 +27,7 @@
       --r-xl: 24px; --r-lg: 18px; --r-md: 13px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { overscroll-behavior: none; }
     body {
       background: var(--bg);
       font-family: 'Nunito', sans-serif;
@@ -34,7 +35,9 @@
       min-height: 100vh;
       display: flex; flex-direction: column; align-items: center;
       overflow-x: hidden;
+      overscroll-behavior: none;
     }
+    #grid-container { touch-action: none; }
 
     /* Pastel background blobs */
     .blob { position: fixed; border-radius: 50%; pointer-events: none; filter: blur(70px); opacity: 0.58; z-index: 0; }
@@ -489,12 +492,14 @@ document.addEventListener('keydown', e => {
 
 let tx=0, ty=0;
 const gc = document.getElementById('grid-container');
-gc.addEventListener('touchstart', e => { tx=e.touches[0].clientX; ty=e.touches[0].clientY; }, {passive:true});
+gc.addEventListener('touchstart', e => { tx=e.touches[0].clientX; ty=e.touches[0].clientY; e.preventDefault(); }, {passive:false});
+gc.addEventListener('touchmove', e => { e.preventDefault(); }, {passive:false});
 gc.addEventListener('touchend', e => {
+  e.preventDefault();
   const dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty;
   if (Math.abs(dx)<20 && Math.abs(dy)<20) return;
   move(Math.abs(dx)>Math.abs(dy) ? (dx>0?'ArrowRight':'ArrowLeft') : (dy>0?'ArrowDown':'ArrowUp'));
-}, {passive:true});
+}, {passive:false});
 
 document.getElementById('newGameBtn').addEventListener('click', newGame);
 document.getElementById('undoBtn').addEventListener('click', () => {
