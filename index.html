@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SOAR — Stack. Overcome. Ascend. Rise.</title>
+  <meta name="description" content="SOAR is a vibrant motivational puzzle game inspired by 2048. Merge tiles, level up, and rise to Champion. Built by Prajit Datta." />
+  <meta name="keywords" content="soar game, 2048 like game, merge puzzle game, motivational game, fun browser game, free puzzle game, prajit datta, level up game" />
+  <meta name="author" content="Prajit Datta" />
+  <meta property="og:title" content="SOAR — Stack. Overcome. Ascend. Rise." />
+  <meta property="og:description" content="A vibrant, motivating merge puzzle game by Prajit Datta. Combine tiles and rise to the top!" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://prajitdatta.github.io/soar-game" />
+  <meta property="og:image" content="https://static.wixstatic.com/media/68ad1b_96c952149d584505bdfc30a3cbf36795~mv2.jpg" />
+  <link rel="icon" type="image/jpeg" href="https://static.wixstatic.com/media/68ad1b_96c952149d584505bdfc30a3cbf36795~mv2.jpg" />
+  <link rel="apple-touch-icon" href="https://static.wixstatic.com/media/68ad1b_96c952149d584505bdfc30a3cbf36795~mv2.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #FFF8EF;
+      --grid-bg: #F2E4D0;
+      --text-dark: #2D1F0E;
+      --text-mid: #8B6E52;
+      --text-soft: #BFA07A;
+      --shadow: 0 8px 32px rgba(160,80,0,0.13);
+      --r-xl: 24px; --r-lg: 18px; --r-md: 13px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      font-family: 'Nunito', sans-serif;
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* Pastel background blobs */
+    .blob { position: fixed; border-radius: 50%; pointer-events: none; filter: blur(70px); opacity: 0.58; z-index: 0; }
+    .b1 { width: 520px; height: 520px; background: #FFD6E0; top: -180px; left: -160px; animation: bf 18s ease-in-out infinite alternate; }
+    .b2 { width: 420px; height: 420px; background: #C3F0FF; bottom: -130px; right: -130px; animation: bf 22s ease-in-out infinite alternate-reverse; }
+    .b3 { width: 300px; height: 300px; background: #C8F5D4; top: 42%; left: 52%; animation: bf 14s ease-in-out infinite alternate; }
+    .b4 { width: 220px; height: 220px; background: #FFE8A3; top: 18%; right: 3%; animation: bf 16s ease-in-out infinite alternate-reverse; }
+    @keyframes bf { from { transform: translate(0,0) scale(1); } to { transform: translate(28px, 22px) scale(1.06); } }
+
+    /* Floating confetti */
+    .cf { position: fixed; pointer-events: none; z-index: 0; font-size: 1.6rem; opacity: .15; animation: floatup var(--d,14s) ease-in-out infinite; animation-delay: var(--dl,0s); }
+    @keyframes floatup { 0% { transform: translateY(108vh) rotate(0deg); opacity: 0; } 8% { opacity: .15; } 92% { opacity: .15; } 100% { transform: translateY(-8vh) rotate(400deg); opacity: 0; } }
+
+    /* App shell */
+    #app { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; padding: 26px 16px 32px; width: 100%; max-width: 500px; }
+
+    /* Header */
+    header { text-align: center; margin-bottom: 18px; width: 100%; }
+    .logo-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px; }
+    .logo-icon { font-size: 2.7rem; animation: wgl 2.8s ease-in-out infinite; }
+    .logo-icon.r { animation-delay: -1.4s; }
+    @keyframes wgl { 0%,100% { transform: rotate(-5deg) scale(1); } 50% { transform: rotate(5deg) scale(1.1); } }
+    .logo {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(3rem, 13vw, 5rem); letter-spacing: .08em; line-height: 1;
+      background: linear-gradient(130deg, #FF6B6B 0%, #FF9F43 28%, #FECA57 52%, #48DBFB 76%, #FF6B9D 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      filter: drop-shadow(0 4px 0 rgba(255,120,80,.22));
+    }
+    .tagline { font-size: .72rem; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: var(--text-mid); }
+    .motto { font-size: .63rem; font-weight: 600; letter-spacing: .1em; color: var(--text-soft); margin-top: 3px; }
+
+    /* Score row */
+    .score-row { display: flex; gap: 10px; width: 100%; margin-bottom: 14px; }
+    .score-box { flex: 1; background: #fff; border-radius: var(--r-lg); padding: 12px 16px; text-align: center; box-shadow: var(--shadow), 0 1px 0 rgba(255,255,255,.9) inset; border: 2.5px solid transparent; }
+    .score-box.sc { border-color: #FFD6E0; }
+    .score-box.bs { border-color: #FFE8A3; }
+    .score-label { font-size: .58rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--text-soft); margin-bottom: 3px; }
+    .score-val { font-family: 'Fredoka One', cursive; font-size: 1.7rem; color: var(--text-dark); line-height: 1; }
+    .score-box.bs .score-val { color: #FF9F43; }
+
+    /* Controls */
+    .controls { display: flex; gap: 10px; width: 100%; margin-bottom: 16px; }
+    button { font-family: 'Nunito', sans-serif; cursor: pointer; border: none; transition: all .18s ease; }
+    .btn-p {
+      flex: 1; background: linear-gradient(135deg, #FF6B6B, #FF9F43); color: #fff;
+      padding: 13px 20px; border-radius: 50px; font-size: .78rem; font-weight: 800;
+      letter-spacing: .12em; text-transform: uppercase;
+      box-shadow: 0 6px 20px rgba(255,107,107,.38), 0 2px 0 rgba(0,0,0,.09) inset;
+    }
+    .btn-p:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 28px rgba(255,107,107,.48); }
+    .btn-p:active { transform: scale(.97); }
+    .btn-s {
+      background: #fff; color: var(--text-mid); padding: 13px 18px; border-radius: 50px;
+      font-size: .75rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+      box-shadow: 0 4px 14px rgba(0,0,0,.09), 0 1px 0 rgba(255,255,255,.9) inset;
+      border: 2.5px solid #F0E0D0;
+    }
+    .btn-s:hover { background: #FFF0E8; color: var(--text-dark); transform: translateY(-2px); }
+
+    /* Grid */
+    #grid-container {
+      width: 100%; aspect-ratio: 1/1;
+      background: var(--grid-bg); border-radius: var(--r-xl); padding: 12px;
+      box-shadow: var(--shadow), 0 2px 0 rgba(255,255,255,.8) inset;
+      border: 3px solid rgba(255,255,255,.9); position: relative;
+    }
+    #grid { display: grid; grid-template-columns: repeat(4,1fr); grid-template-rows: repeat(4,1fr); gap: 10px; height: 100%; width: 100%; }
+    .cell-bg { background: rgba(255,255,255,.42); border-radius: var(--r-md); border: 2px dashed rgba(160,110,60,.13); }
+
+    /* Tiles */
+    #tiles-layer { position: absolute; top: 12px; left: 12px; right: 12px; bottom: 12px; pointer-events: none; }
+    .tile {
+      position: absolute; border-radius: var(--r-md);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: left .13s cubic-bezier(.4,0,.2,1), top .13s cubic-bezier(.4,0,.2,1);
+      user-select: none; will-change: left, top;
+      box-shadow: 0 6px 18px rgba(0,0,0,.14), 0 2px 0 rgba(255,255,255,.55) inset;
+      border: 3px solid rgba(255,255,255,.7);
+    }
+    .tile-emoji { font-size: clamp(1.5rem, 6.5vw, 2.4rem); line-height: 1; margin-bottom: 1px; }
+    .tile-name { font-weight: 800; font-size: clamp(.4rem, 1.6vw, .56rem); letter-spacing: .04em; text-transform: uppercase; color: rgba(0,0,0,.5); }
+    .tile-val { font-family: 'Fredoka One', cursive; font-size: clamp(.52rem, 1.9vw, .7rem); color: rgba(0,0,0,.32); margin-top: 1px; }
+
+    @keyframes tpop { 0% { transform: scale(.15) rotate(-8deg); opacity: 0; } 55% { transform: scale(1.14) rotate(2deg); opacity: 1; } 78% { transform: scale(.96) rotate(-1deg); } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+    .tile-new { animation: tpop .3s cubic-bezier(.34,1.56,.64,1) forwards; }
+
+    @keyframes mpop { 0% { transform: scale(1); } 30% { transform: scale(1.24) rotate(-2deg); } 58% { transform: scale(.93) rotate(2deg); } 78% { transform: scale(1.07); } 100% { transform: scale(1); } }
+    .tile-merged { animation: mpop .35s cubic-bezier(.34,1.56,.64,1) forwards; }
+
+    /* Score popup */
+    @keyframes sfloat { 0% { opacity: 1; transform: translateY(0) scale(1); } 30% { transform: translateY(-16px) scale(1.2); } 100% { opacity: 0; transform: translateY(-68px) scale(.8); } }
+    .score-popup {
+      position: absolute; z-index: 20; pointer-events: none;
+      font-family: 'Fredoka One', cursive; font-size: 1.25rem; white-space: nowrap;
+      animation: sfloat .95s ease-out forwards;
+    }
+
+    /* Motivation text */
+    @keyframes mfloat { 0% { opacity: 0; transform: translateY(0) scale(.8); } 20% { opacity: 1; transform: translateY(-14px) scale(1.05); } 70% { opacity: 1; } 100% { opacity: 0; transform: translateY(-55px) scale(.9); } }
+    .motiv-popup {
+      position: absolute; z-index: 19; pointer-events: none;
+      font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .65rem;
+      letter-spacing: .05em; white-space: nowrap;
+      animation: mfloat 1.4s ease-out forwards;
+    }
+
+    /* Overlay */
+    .overlay {
+      position: absolute; inset: 0; border-radius: calc(var(--r-xl) - 3px);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: rgba(255,248,239,.92); backdrop-filter: blur(14px);
+      z-index: 30; opacity: 0; pointer-events: none; transition: opacity .35s ease;
+    }
+    .overlay.active { opacity: 1; pointer-events: all; }
+    .ov-emoji { font-size: 3.2rem; animation: bounce 1s ease-in-out infinite alternate; margin-bottom: 4px; }
+    @keyframes bounce { from { transform: translateY(0) scale(1); } to { transform: translateY(-10px) scale(1.1); } }
+    .ov-title { font-family: 'Fredoka One', cursive; font-size: 2.2rem; line-height: 1; margin-bottom: 4px; }
+    .ov-title.win { background: linear-gradient(135deg, #FF6B6B, #FF9F43, #FECA57); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .ov-title.lose { color: #C0722A; }
+    .ov-sub { font-size: .72rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--text-soft); margin-bottom: 8px; }
+    .ov-score { font-family: 'Fredoka One', cursive; font-size: 2rem; color: #FF9F43; margin-bottom: 16px; }
+    .ov-btn {
+      background: linear-gradient(135deg, #FF6B6B, #FF9F43); color: #fff;
+      padding: 14px 44px; border-radius: 50px; font-family: 'Nunito', sans-serif; font-weight: 800;
+      font-size: .85rem; letter-spacing: .15em; text-transform: uppercase; cursor: pointer; border: none;
+      box-shadow: 0 8px 24px rgba(255,107,107,.4), 0 2px 0 rgba(255,255,255,.3) inset;
+      transition: all .2s;
+    }
+    .ov-btn:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 12px 32px rgba(255,107,107,.5); }
+
+    /* Legend */
+    .legend { margin-top: 18px; width: 100%; background: #fff; border-radius: var(--r-xl); padding: 16px 18px; box-shadow: var(--shadow); border: 2.5px solid rgba(255,255,255,.9); }
+    .legend-title { font-size: .62rem; font-weight: 800; letter-spacing: .22em; color: var(--text-soft); text-transform: uppercase; margin-bottom: 12px; }
+    .legend-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 7px; }
+    .legend-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 7px 2px; border-radius: 10px; background: var(--bg); border: 1.5px solid rgba(0,0,0,.04); }
+    .legend-emoji { font-size: 1.2rem; }
+    .legend-name { font-size: .42rem; font-weight: 800; color: var(--text-mid); text-align: center; text-transform: uppercase; letter-spacing: .04em; }
+
+    /* Instructions */
+    .instructions { margin-top: 14px; text-align: center; font-size: .65rem; font-weight: 600; color: var(--text-soft); letter-spacing: .08em; line-height: 2; }
+    .key { background: #fff; border-radius: 6px; padding: 1px 7px; box-shadow: 0 2px 6px rgba(0,0,0,.1); font-weight: 800; color: var(--text-dark); }
+    .swipe-hint { display: none; }
+    @media (pointer:coarse) { .swipe-hint { display: inline; } .kb-hint { display: none; } }
+
+    /* Footer */
+    footer { margin-top: 24px; padding-bottom: 28px; text-align: center; font-size: .6rem; font-weight: 700; letter-spacing: .1em; color: var(--text-soft); }
+    .footer-brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 9px; }
+    .footer-avatar { width: 33px; height: 33px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 12px rgba(255,107,107,.25); object-fit: cover; }
+    .footer-name { font-family: 'Fredoka One', cursive; font-size: 1.05rem; background: linear-gradient(135deg, #FF6B6B, #FF9F43); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .footer-links { display: flex; gap: 12px; justify-content: center; }
+    footer a { color: var(--text-soft); text-decoration: none; font-weight: 800; padding: 5px 14px; background: #fff; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.08); transition: all .2s; }
+    footer a:hover { color: #FF6B6B; transform: translateY(-2px); box-shadow: 0 5px 14px rgba(255,107,107,.2); }
+
+    @media (max-width:480px) { #app { padding: 16px 12px 24px; } .logo { font-size: 3rem; } }
+  </style>
+</head>
+<body>
+
+<div class="blob b1"></div>
+<div class="blob b2"></div>
+<div class="blob b3"></div>
+<div class="blob b4"></div>
+<div class="cf" style="left:5%;--d:13s;--dl:0s">🌟</div>
+<div class="cf" style="left:18%;--d:17s;--dl:2s">🚀</div>
+<div class="cf" style="left:33%;--d:11s;--dl:5s">✨</div>
+<div class="cf" style="left:52%;--d:15s;--dl:1s">⚡</div>
+<div class="cf" style="left:68%;--d:19s;--dl:3s">🎯</div>
+<div class="cf" style="left:82%;--d:12s;--dl:7s">💥</div>
+<div class="cf" style="left:92%;--d:16s;--dl:4s">🔥</div>
+<div class="cf" style="left:42%;--d:20s;--dl:9s">🏆</div>
+
+<div id="app">
+  <header>
+    <div class="logo-row">
+      <span class="logo-icon">🚀</span>
+      <div class="logo">SOAR</div>
+      <span class="logo-icon r">⭐</span>
+    </div>
+    <div class="tagline">Stack · Overcome · Ascend · Rise</div>
+    <div class="motto">Every merge makes you stronger 💪</div>
+  </header>
+
+  <div class="score-row">
+    <div class="score-box sc">
+      <div class="score-label">✦ Score</div>
+      <div class="score-val" id="score">0</div>
+    </div>
+    <div class="score-box bs">
+      <div class="score-label">🏆 Best</div>
+      <div class="score-val" id="best">0</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn-p" id="newGameBtn">🚀 New Game</button>
+    <button class="btn-s" id="undoBtn">↩ Undo</button>
+  </div>
+
+  <div id="grid-container">
+    <div id="grid"></div>
+    <div id="tiles-layer"></div>
+
+    <div class="overlay" id="winOverlay">
+      <div class="ov-emoji">🏆</div>
+      <div class="ov-title win">YOU SOARED!</div>
+      <div class="ov-sub">You reached the summit!</div>
+      <div class="ov-score" id="winScore"></div>
+      <button class="ov-btn" id="continueBtn">Keep Flying! 🚀</button>
+    </div>
+
+    <div class="overlay" id="loseOverlay">
+      <div class="ov-emoji">💪</div>
+      <div class="ov-title lose">Rise Again!</div>
+      <div class="ov-sub">Every setback is a setup</div>
+      <div class="ov-score" id="loseScore"></div>
+      <button class="ov-btn" id="retryBtn">Try Again! 🔥</button>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-title">🌈 Your Rise Journey</div>
+    <div class="legend-grid" id="legendGrid"></div>
+  </div>
+
+  <div class="instructions">
+    <span class="kb-hint">Move: <span class="key">↑</span> <span class="key">↓</span> <span class="key">←</span> <span class="key">→</span> or <span class="key">WASD</span></span>
+    <span class="swipe-hint">👆 Swipe to slide tiles!</span><br/>
+    Merge matching tiles to level up.<br/>
+    Reach <strong style="color:#FF9F43">🏆 Champion</strong> to win!
+  </div>
+
+  <footer>
+    <div class="footer-brand">
+      <img class="footer-avatar"
+           src="https://static.wixstatic.com/media/68ad1b_96c952149d584505bdfc30a3cbf36795~mv2.jpg"
+           alt="Prajit Datta" />
+      <span class="footer-name">Prajit Datta</span>
+    </div>
+    <div class="footer-links">
+      <a href="https://prajitdatta.github.io/" target="_blank" rel="noopener">🌐 Portfolio</a>
+      <a href="https://github.com/prajitdatta" target="_blank" rel="noopener">⌥ GitHub</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+// ── LEVEL DEFINITIONS ──────────────────────────────────────────────────────
+const LEVELS = [
+  { value: 2,    name: "Spark",     emoji: "✨", bg: "#FFF8CC", border: "#FFE040", glow: "rgba(255,220,40,.4)"  },
+  { value: 4,    name: "Hustle",    emoji: "💪", bg: "#FFE8D0", border: "#FF9F43", glow: "rgba(255,159,67,.4)"  },
+  { value: 8,    name: "Grind",     emoji: "🔥", bg: "#FFD4D4", border: "#FF6B6B", glow: "rgba(255,107,107,.5)" },
+  { value: 16,   name: "Focus",     emoji: "🎯", bg: "#FFD6EF", border: "#FF6B9D", glow: "rgba(255,107,157,.5)" },
+  { value: 32,   name: "Momentum", emoji: "⚡", bg: "#EED4FF", border: "#A855F7", glow: "rgba(168,85,247,.5)"  },
+  { value: 64,   name: "Flow",      emoji: "🌊", bg: "#D0F0FF", border: "#48DBFB", glow: "rgba(72,219,251,.5)"  },
+  { value: 128,  name: "Rise",      emoji: "🚀", bg: "#D0FFE8", border: "#1DD1A1", glow: "rgba(29,209,161,.5)"  },
+  { value: 256,  name: "Thrive",    emoji: "🌟", bg: "#C8FFD4", border: "#2ECC71", glow: "rgba(46,204,113,.5)"  },
+  { value: 512,  name: "Soar",      emoji: "🦅", bg: "#CCF0FF", border: "#0ABDE3", glow: "rgba(10,189,227,.5)"  },
+  { value: 1024, name: "Legend",    emoji: "👑", bg: "#FFF0B0", border: "#F9CA24", glow: "rgba(249,202,36,.5)"  },
+  { value: 2048, name: "Elite",     emoji: "💎", bg: "#E0D4FF", border: "#8B5CF6", glow: "rgba(139,92,246,.6)"  },
+  { value: 4096, name: "Champion",  emoji: "🏆", bg: "#FFE8B0", border: "#FF9F43", glow: "rgba(255,159,67,.7)"  },
+];
+
+const MOTIVES = ["Keep pushing! 🔥","You've got this! 💪","Unstoppable! ⚡","Crushing it! 🎯","On fire! 🚀","Legendary! 👑","Phenomenal! 💥","Beast mode! 🦁"];
+const POPUP_COLORS = ["#FF6B6B","#FF9F43","#FECA57","#48DBFB","#1DD1A1","#A855F7","#FF6B9D"];
+
+const lv = v => LEVELS.find(l => l.value === v) || LEVELS[LEVELS.length - 1];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+const SZ = 4;
+let board, score, best, tid, won, continueWin, prevBoard, prevScore;
+let tileEls = {};
+
+function newGame() {
+  board = Array.from({length: SZ}, () => Array(SZ).fill(null));
+  score = 0; won = false; continueWin = false; tid = 0; prevBoard = null; prevScore = 0;
+  tileEls = {}; document.getElementById('tiles-layer').innerHTML = '';
+  spawn(); spawn(); render(); hideOverlays();
+}
+
+function spawn() {
+  const empty = [];
+  for (let r=0;r<SZ;r++) for (let c=0;c<SZ;c++) if (!board[r][c]) empty.push([r,c]);
+  if (!empty.length) return;
+  const [r,c] = empty[Math.floor(Math.random()*empty.length)];
+  board[r][c] = { id: ++tid, value: Math.random()<.85?2:4, isNew:true, isMerged:false };
+}
+
+const clone = b => b.map(row => row.map(cell => cell ? {...cell} : null));
+
+// ── MOVE ──────────────────────────────────────────────────────────────────
+const OPS = {
+  ArrowLeft:  { rows:[0,1,2,3], cols:[1,2,3],   dr:0,  dc:-1 },
+  ArrowRight: { rows:[0,1,2,3], cols:[2,1,0],   dr:0,  dc:1  },
+  ArrowUp:    { rows:[1,2,3],   cols:[0,1,2,3], dr:-1, dc:0  },
+  ArrowDown:  { rows:[2,1,0],   cols:[0,1,2,3], dr:1,  dc:0  },
+};
+
+function move(dir) {
+  const op = OPS[dir]; if (!op) return;
+  prevBoard = clone(board); prevScore = score;
+  let moved = false;
+
+  for (let r=0;r<SZ;r++) for (let c=0;c<SZ;c++)
+    if (board[r][c]) { board[r][c].isNew = false; board[r][c].isMerged = false; }
+
+  const proc = (r0, c0) => {
+    if (!board[r0][c0]) return;
+    let r=r0, c=c0;
+    while (true) {
+      const nr=r+op.dr, nc=c+op.dc;
+      if (nr<0||nr>=SZ||nc<0||nc>=SZ) break;
+      if (!board[nr][nc]) {
+        board[nr][nc]=board[r][c]; board[r][c]=null; r=nr; c=nc; moved=true;
+      } else if (board[nr][nc].value===board[r][c].value && !board[nr][nc].isMerged && !board[r][c].isMerged) {
+        const nv = board[r][c].value * 2;
+        score += nv;
+        if (score > best) { best=score; localStorage.setItem('soarBest', best); }
+        board[nr][nc] = { id:++tid, value:nv, isNew:false, isMerged:true };
+        board[r][c] = null; moved = true;
+        if (nv === 2048 && !continueWin) won = true;
+        if (nv === 4096) { won = true; continueWin = false; }
+        popScore(nr, nc, '+'+nv.toLocaleString(), POPUP_COLORS[Math.floor(Math.random()*POPUP_COLORS.length)]);
+        popMotiv(nr, nc);
+        break;
+      } else break;
+    }
+  };
+
+  for (const r of op.rows) for (const c of op.cols) proc(r, c);
+
+  if (moved) {
+    spawn(); render();
+    if (won && !continueWin) { setTimeout(showWin, 380); return; }
+    if (!canMove()) setTimeout(showLose, 380);
+  }
+}
+
+function canMove() {
+  for (let r=0;r<SZ;r++) for (let c=0;c<SZ;c++) {
+    if (!board[r][c]) return true;
+    if (c<SZ-1 && board[r][c].value===board[r][c+1]?.value) return true;
+    if (r<SZ-1 && board[r][c].value===board[r+1]?.[c]?.value) return true;
+  }
+  return false;
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+function render() {
+  document.getElementById('score').textContent = score.toLocaleString();
+  document.getElementById('best').textContent = best.toLocaleString();
+
+  const gc = document.getElementById('grid-container');
+  const layer = document.getElementById('tiles-layer');
+  const gap=10, pad=12;
+  const gW = gc.clientWidth - pad*2, gH = gc.clientHeight - pad*2;
+  const cW = (gW - gap*3)/4, cH = (gH - gap*3)/4;
+
+  const alive = new Set();
+  for (let r=0;r<SZ;r++) for (let c=0;c<SZ;c++) if (board[r][c]) alive.add(board[r][c].id);
+  for (const [id, el] of Object.entries(tileEls))
+    if (!alive.has(+id)) { el.remove(); delete tileEls[id]; }
+
+  for (let r=0;r<SZ;r++) for (let c=0;c<SZ;c++) {
+    const cell = board[r][c]; if (!cell) continue;
+    const left = c*(cW+gap), top = r*(cH+gap);
+    const L = lv(cell.value);
+    let el = tileEls[cell.id];
+
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'tile';
+      el.innerHTML = `<div class="tile-emoji">${L.emoji}</div><div class="tile-name">${L.name}</div><div class="tile-val">${cell.value.toLocaleString()}</div>`;
+      el.style.cssText = `width:${cW}px;height:${cH}px;left:${left}px;top:${top}px;background:${L.bg};border-color:${L.border};box-shadow:0 6px 18px rgba(0,0,0,.13),0 0 20px ${L.glow},0 2px 0 rgba(255,255,255,.55) inset;`;
+      layer.appendChild(el);
+      tileEls[cell.id] = el;
+      if (cell.isNew) el.classList.add('tile-new');
+    } else {
+      el.querySelector('.tile-emoji').textContent = L.emoji;
+      el.querySelector('.tile-name').textContent = L.name;
+      el.querySelector('.tile-val').textContent = cell.value.toLocaleString();
+      el.style.background = L.bg;
+      el.style.borderColor = L.border;
+      el.style.boxShadow = `0 6px 18px rgba(0,0,0,.13),0 0 20px ${L.glow},0 2px 0 rgba(255,255,255,.55) inset`;
+      el.style.left = left+'px'; el.style.top = top+'px';
+      if (cell.isMerged) { el.classList.remove('tile-merged'); void el.offsetWidth; el.classList.add('tile-merged'); }
+    }
+  }
+}
+
+// ── POPUPS ────────────────────────────────────────────────────────────────
+function dims() {
+  const gc = document.getElementById('grid-container');
+  const gap=10, pad=12;
+  const gW = gc.clientWidth-pad*2, gH = gc.clientHeight-pad*2;
+  return { cW:(gW-gap*3)/4, cH:(gH-gap*3)/4, gap };
+}
+
+function popScore(r, c, txt, color) {
+  const layer = document.getElementById('tiles-layer');
+  const {cW, cH, gap} = dims();
+  const el = document.createElement('div');
+  el.className = 'score-popup';
+  el.textContent = txt;
+  el.style.color = color;
+  el.style.textShadow = `0 2px 10px ${color}88, 0 0 0 2px #fff`;
+  el.style.left = (c*(cW+gap)+cW/2-28)+'px';
+  el.style.top = (r*(cH+gap))+'px';
+  layer.appendChild(el);
+  setTimeout(() => el.remove(), 960);
+}
+
+function popMotiv(r, c) {
+  const layer = document.getElementById('tiles-layer');
+  const {cW, cH, gap} = dims();
+  const el = document.createElement('div');
+  el.className = 'motiv-popup';
+  const colors = ['#FF6B6B','#FF9F43','#A855F7','#1DD1A1','#48DBFB'];
+  el.style.color = colors[Math.floor(Math.random()*colors.length)];
+  el.textContent = MOTIVES[Math.floor(Math.random()*MOTIVES.length)];
+  el.style.left = Math.max(0, c*(cW+gap) - 20)+'px';
+  el.style.top = (r*(cH+gap) + cH/2)+'px';
+  layer.appendChild(el);
+  setTimeout(() => el.remove(), 1450);
+}
+
+// ── OVERLAYS ──────────────────────────────────────────────────────────────
+function showWin() { document.getElementById('winScore').textContent = score.toLocaleString()+' pts'; document.getElementById('winOverlay').classList.add('active'); }
+function showLose() { document.getElementById('loseScore').textContent = score.toLocaleString()+' pts'; document.getElementById('loseOverlay').classList.add('active'); }
+function hideOverlays() { document.querySelectorAll('.overlay').forEach(o => o.classList.remove('active')); }
+
+// ── LEGEND ────────────────────────────────────────────────────────────────
+function renderLegend() {
+  document.getElementById('legendGrid').innerHTML = LEVELS.map(L =>
+    `<div class="legend-item"><div class="legend-emoji">${L.emoji}</div><div class="legend-name">${L.name}</div></div>`
+  ).join('');
+}
+
+// ── GRID BG ───────────────────────────────────────────────────────────────
+function initGrid() {
+  const g = document.getElementById('grid'); g.innerHTML = '';
+  for (let i=0;i<16;i++) { const d=document.createElement('div'); d.className='cell-bg'; g.appendChild(d); }
+}
+
+// ── INPUT ─────────────────────────────────────────────────────────────────
+const KEYS = { ArrowLeft:1, ArrowRight:1, ArrowUp:1, ArrowDown:1, a:'ArrowLeft', d:'ArrowRight', w:'ArrowUp', s:'ArrowDown', A:'ArrowLeft', D:'ArrowRight', W:'ArrowUp', S:'ArrowDown' };
+document.addEventListener('keydown', e => {
+  const dir = KEYS[e.key]; if (!dir) return;
+  e.preventDefault();
+  move(typeof dir === 'string' ? dir : e.key);
+});
+
+let tx=0, ty=0;
+const gc = document.getElementById('grid-container');
+gc.addEventListener('touchstart', e => { tx=e.touches[0].clientX; ty=e.touches[0].clientY; }, {passive:true});
+gc.addEventListener('touchend', e => {
+  const dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty;
+  if (Math.abs(dx)<20 && Math.abs(dy)<20) return;
+  move(Math.abs(dx)>Math.abs(dy) ? (dx>0?'ArrowRight':'ArrowLeft') : (dy>0?'ArrowDown':'ArrowUp'));
+}, {passive:true});
+
+document.getElementById('newGameBtn').addEventListener('click', newGame);
+document.getElementById('undoBtn').addEventListener('click', () => {
+  if (!prevBoard) return;
+  board=prevBoard; score=prevScore; prevBoard=null;
+  tileEls={}; document.getElementById('tiles-layer').innerHTML='';
+  render(); hideOverlays();
+});
+document.getElementById('continueBtn').addEventListener('click', () => { continueWin=true; hideOverlays(); });
+document.getElementById('retryBtn').addEventListener('click', newGame);
+
+window.addEventListener('resize', () => { tileEls={}; document.getElementById('tiles-layer').innerHTML=''; render(); });
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+best = parseInt(localStorage.getItem('soarBest')||'0');
+initGrid();
+renderLegend();
+newGame();
+</script>
+</body>
+</html>
