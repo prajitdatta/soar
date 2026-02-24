@@ -2,7 +2,7 @@
 
 > *A vibrant, motivational merge puzzle game. Combine tiles, level up your mindset, and rise all the way to Champion!*
 
-[![Play Now](https://img.shields.io/badge/▶%20Play%20Now-Live%20Demo-FF6B6B?style=for-the-badge)](https://prajitdatta.github.io/soar-game)
+[![Play Now](https://img.shields.io/badge/▶%20Play%20Now-Live%20Demo-FF6B6B?style=for-the-badge)](https://prajitdatta.github.io/soar)
 [![Portfolio](https://img.shields.io/badge/🌐%20Portfolio-prajitdatta.github.io-FF9F43?style=for-the-badge)](https://prajitdatta.github.io/)
 [![GitHub](https://img.shields.io/badge/GitHub-prajitdatta-FECA57?style=for-the-badge&logo=github&logoColor=black)](https://github.com/prajitdatta)
 [![License: MIT](https://img.shields.io/badge/License-MIT-48DBFB.svg?style=for-the-badge)](LICENSE)
